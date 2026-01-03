@@ -11,58 +11,18 @@ class AIProjectTemplate(TemplateManager):
 
     def render(self, output_path: Path, context: Dict[str, Any]) -> None:
         """Render the AI Project template."""
-        project_name = context["project_name_snake"]
-
         # Create directory structure
         self._create_structure(output_path)
 
-        # Generate files
+        # Generate non-Python files only
         self._generate_config_yaml(output_path, context)
-        self._generate_main_py(output_path, context)
         self._generate_requirements(output_path, context)
         self._generate_readme(output_path, context)
         self._generate_gitignore(output_path)
 
-        # RAG Pipeline
-        self._generate_rag_embedder(output_path, context)
-        self._generate_rag_retriever(output_path, context)
-        self._generate_rag_generator(output_path, context)
-        self._generate_rag_init(output_path)
-
-        # NLP Pipeline
-        self._generate_nlp_processor(output_path, context)
-        self._generate_nlp_init(output_path)
-
-        # Pipelines init
-        self._generate_pipelines_init(output_path)
-
-        # Models
-        self._generate_embedding_model(output_path, context)
-        self._generate_embedding_init(output_path)
-        self._generate_finetune_trainer(output_path, context)
-        self._generate_finetune_init(output_path)
-        self._generate_inference(output_path, context)
-        self._generate_models_init(output_path)
-
-        # Data module
-        self._generate_data_loader(output_path, context)
-        self._generate_data_init(output_path)
-
-        # Utils
-        self._generate_utils_logger(output_path, context)
-        self._generate_utils_helpers(output_path, context)
-        self._generate_utils_init(output_path)
-
-        # App init
-        self._generate_app_init(output_path)
-
-        # Notebooks
-        self._generate_preprocessing_notebook(output_path, context)
-        self._generate_training_notebook(output_path, context)
-        self._generate_evaluation_notebook(output_path, context)
-
-        # Tests
-        self._generate_tests_init(output_path)
+        # Documentation for AI assistants
+        self._generate_claude_md(output_path, context)
+        self._generate_copilot_instruction(output_path, context)
 
     def _create_structure(self, output_path: Path) -> None:
         """Create directory structure."""
@@ -77,6 +37,7 @@ class AIProjectTemplate(TemplateManager):
             "notebooks",
             "configs",
             "tests",
+            ".github",
         ]
 
         for dir_path in dirs:
@@ -1158,3 +1119,1231 @@ __all__ = ["setup_logging"]
 '''
 
         self._create_file(output_path / "tests/__init__.py", content)
+
+    def _generate_claude_md(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate CLAUDE.md for Claude Code."""
+        content = """# {project_name} - AI/ML Project Documentation for Claude Code
+
+This document provides an overview of the project structure and architecture for AI-assisted development with Claude Code.
+
+## Project Overview
+
+This is an **AI/ML project** designed for building intelligent applications with modular pipelines, including RAG (Retrieval-Augmented Generation) and NLP capabilities.
+
+## Project Structure
+
+```
+{project_name}/
+├── app/                          # Main application code
+│   ├── main.py                   # Application entry point
+│   ├── pipelines/                # Processing pipelines
+│   │   ├── rag/                  # Retrieval-Augmented Generation
+│   │   │   ├── embedder.py       # Text embedding component
+│   │   │   ├── retriever.py      # Document retrieval component
+│   │   │   └── generator.py      # Response generation component
+│   │   └── nlp/                  # Natural Language Processing
+│   │       └── processor.py      # Text processing utilities
+│   ├── models/                   # ML models
+│   │   ├── embedding/            # Embedding models
+│   │   │   └── embedder.py       # Embedding model wrapper
+│   │   ├── finetune/             # Fine-tuning utilities
+│   │   │   └── trainer.py        # Model training logic
+│   │   └── inference.py          # Inference engine
+│   ├── data/                     # Data management
+│   │   ├── raw/                  # Raw data storage
+│   │   ├── processed/            # Processed data storage
+│   │   └── loader.py             # Data loading utilities
+│   └── utils/                    # Utility functions
+│       ├── logger.py             # Logging configuration
+│       └── helpers.py            # Helper functions
+├── notebooks/                    # Jupyter notebooks
+│   ├── preprocessing.ipynb       # Data preprocessing
+│   ├── training.ipynb            # Model training
+│   └── evaluation.ipynb          # Model evaluation
+├── configs/                      # Configuration files
+│   └── default.yml               # Default configuration
+├── tests/                        # Test files
+├── requirements.txt              # Python dependencies
+└── README.md                     # Project documentation
+```
+
+## Architecture Pattern
+
+### Pipeline-Based Architecture
+
+The project follows a **modular pipeline architecture** where different components can be composed together:
+
+1. **Pipelines**: High-level workflows that orchestrate multiple components
+   - RAG Pipeline: Embedding → Retrieval → Generation
+   - NLP Pipeline: Text preprocessing and analysis
+
+2. **Models**: ML model wrappers and training utilities
+   - Embedding models for vector representations
+   - Fine-tuning utilities for model customization
+   - Inference engine for predictions
+
+3. **Data Layer**: Data loading and preprocessing
+   - Raw data ingestion
+   - Data transformation and cleaning
+   - Dataset management
+
+4. **Utils**: Shared utilities and helpers
+   - Logging and monitoring
+   - Common helper functions
+
+## Key Components
+
+### RAG Pipeline
+
+**Purpose**: Implement retrieval-augmented generation for context-aware responses
+
+**Components**:
+- `embedder.py`: Converts text to vector embeddings
+- `retriever.py`: Finds relevant documents based on query
+- `generator.py`: Generates responses using retrieved context
+
+**Flow**:
+```
+Query → Embedder → Retriever → Generator → Response
+```
+
+### NLP Pipeline
+
+**Purpose**: Text processing and analysis
+
+**Components**:
+- `processor.py`: Text preprocessing, tokenization, and analysis
+
+### Models Module
+
+**Purpose**: ML model management and training
+
+**Components**:
+- `embedding/embedder.py`: Embedding model wrapper (e.g., sentence-transformers)
+- `finetune/trainer.py`: Training loop for fine-tuning models
+- `inference.py`: Inference engine for predictions
+
+### Data Module
+
+**Purpose**: Data management and loading
+
+**Components**:
+- `loader.py`: Data loading from various sources
+- `raw/`: Raw data storage
+- `processed/`: Processed and cleaned data
+
+## Development Workflow
+
+### 1. Data Preparation
+```python
+# Use notebooks/preprocessing.ipynb
+from app.data.loader import DataLoader
+
+loader = DataLoader()
+data = loader.load_raw_data("path/to/data")
+processed = loader.preprocess(data)
+loader.save_processed(processed)
+```
+
+### 2. Model Training
+```python
+# Use notebooks/training.ipynb
+from app.models.finetune.trainer import Trainer
+
+trainer = Trainer(config)
+model = trainer.train(training_data)
+trainer.save_model(model, "path/to/save")
+```
+
+### 3. Inference
+```python
+# Use app/main.py or notebooks/evaluation.ipynb
+from app.models.inference import InferenceEngine
+
+engine = InferenceEngine(model_path)
+predictions = engine.predict(input_data)
+```
+
+### 4. RAG Pipeline
+```python
+from app.pipelines.rag.embedder import Embedder
+from app.pipelines.rag.retriever import Retriever
+from app.pipelines.rag.generator import Generator
+
+# Initialize components
+embedder = Embedder()
+retriever = Retriever(embedder)
+generator = Generator()
+
+# Process query
+query = "What is machine learning?"
+docs = retriever.retrieve(query, top_k=5)
+response = generator.generate(query, docs)
+```
+
+## Configuration
+
+Configuration is managed through YAML files in `configs/`:
+
+```yaml
+app:
+  name: {project_name}
+  version: "1.0.0"
+
+data:
+  raw_path: "app/data/raw"
+  processed_path: "app/data/processed"
+
+rag:
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  chunk_size: 512
+  top_k: 5
+
+model:
+  name: "default-model"
+  batch_size: 32
+  learning_rate: 0.001
+```
+
+## Best Practices
+
+### Code Organization
+- Keep pipelines modular and composable
+- Separate data loading from processing
+- Use configuration files for hyperparameters
+- Write comprehensive tests for each component
+
+### ML Development
+- Use notebooks for experimentation
+- Version control your models and data
+- Log experiments and metrics
+- Document model performance and limitations
+
+### Data Management
+- Keep raw data immutable
+- Version processed datasets
+- Document data preprocessing steps
+- Use data loaders for consistent access
+
+## Testing
+
+Run tests using pytest:
+```bash
+pytest tests/
+```
+
+Write tests for:
+- Data loading and preprocessing
+- Model inference
+- Pipeline components
+- Utility functions
+
+## Common Tasks
+
+### Adding a New Pipeline Component
+
+1. Create new file in `app/pipelines/<pipeline_name>/`
+2. Implement the component class
+3. Add initialization in `__init__.py`
+4. Write tests in `tests/`
+5. Update configuration if needed
+
+### Fine-tuning a Model
+
+1. Prepare training data in `app/data/processed/`
+2. Configure training parameters in `configs/`
+3. Use `app/models/finetune/trainer.py`
+4. Evaluate in `notebooks/evaluation.ipynb`
+5. Save model checkpoints
+
+### Adding New Data Sources
+
+1. Update `app/data/loader.py` with new loader method
+2. Document data format and schema
+3. Add preprocessing logic
+4. Write data validation tests
+
+## Tips for AI Assistants
+
+When working with this codebase:
+
+1. **Understand the Pipeline**: Know the flow of data through RAG or NLP pipelines
+2. **Check Configuration**: Many behaviors are configured in YAML files
+3. **Use Notebooks**: Experiment and prototype in Jupyter notebooks first
+4. **Test Components**: Each pipeline component should be testable independently
+5. **Document Models**: Always document model architecture, training data, and performance
+6. **Version Data**: Keep track of data versions and preprocessing steps
+
+## Common Patterns
+
+### Loading Configuration
+```python
+from app.core.config import settings
+
+# Access config values
+model_name = settings.model.name
+batch_size = settings.model.batch_size
+```
+
+### Error Handling
+- Validate inputs at pipeline entry points
+- Handle model loading errors gracefully
+- Log errors with context
+- Provide meaningful error messages
+
+### Logging
+```python
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+logger.info("Processing started")
+```
+
+## Resources
+
+- Project documentation: See README.md
+- Model documentation: See model cards in `models/`
+- Data documentation: See data sheets in `data/`
+- API documentation: Generate with sphinx or similar tools
+
+---
+
+**Note**: This project is designed for AI/ML development with focus on modularity, experimentation, and production deployment.
+""".format(**context)
+
+        self._create_file(output_path / "CLAUDE.md", content)
+
+    def _generate_preprocessing_notebook(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate preprocessing.ipynb notebook."""
+        content = '''{{
+ "cells": [
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "# {project_name} - Data Preprocessing\\n",
+    "\\n",
+    "This notebook handles data preprocessing and preparation."
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "import sys\\n",
+    "sys.path.append('..')\\n",
+    "\\n",
+    "import numpy as np\\n",
+    "import pandas as pd\\n",
+    "import yaml\\n",
+    "from pathlib import Path\\n",
+    "\\n",
+    "from app.data.loader import DataLoader\\n",
+    "from app.utils.logger import setup_logging\\n",
+    "\\n",
+    "# Setup logging\\n",
+    "setup_logging()"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 1. Load Configuration"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Load config\\n",
+    "config_path = Path('../configs/default.yml')\\n",
+    "with open(config_path, 'r') as f:\\n",
+    "    config = yaml.safe_load(f)\\n",
+    "\\n",
+    "print('Configuration loaded successfully')\\n",
+    "print(f\\"Data paths:\\")\\n",
+    "print(f\\"  Raw: {{config['data']['raw_path']}}\\")\\n",
+    "print(f\\"  Processed: {{config['data']['processed_path']}}\\")"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 2. Initialize Data Loader"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "data_loader = DataLoader(\\n",
+    "    raw_path=config['data']['raw_path'],\\n",
+    "    processed_path=config['data']['processed_path']\\n",
+    ")"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 3. Load Raw Data\\n",
+    "\\n",
+    "TODO: Implement your data loading logic"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Example: Load your raw data\\n",
+    "# raw_data = data_loader.load_raw_data('your_data_file.csv')\\n",
+    "\\n",
+    "print('Data loading completed')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 4. Data Preprocessing\\n",
+    "\\n",
+    "TODO: Implement preprocessing steps"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Add your preprocessing logic here\\n",
+    "pass"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 5. Save Processed Data"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Save processed data\\n",
+    "# data_loader.save_processed_data(processed_data, 'processed_data.pkl')\\n",
+    "\\n",
+    "print('Preprocessing completed!')"
+   ],
+   "outputs": []
+  }}
+ ],
+ "metadata": {{
+  "kernelspec": {{
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }},
+  "language_info": {{
+   "codemirror_mode": {{
+    "name": "ipython",
+    "version": 3
+   }},
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  }}
+ }},
+ "nbformat": 4,
+ "nbformat_minor": 4
+}}
+'''.format(**context)
+
+        self._create_file(output_path / "notebooks/preprocessing.ipynb", content)
+
+    def _generate_training_notebook(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate training.ipynb notebook."""
+        content = '''{{
+ "cells": [
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "# {project_name} - Model Training\\n",
+    "\\n",
+    "This notebook handles model training and fine-tuning."
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "import sys\\n",
+    "sys.path.append('..')\\n",
+    "\\n",
+    "import numpy as np\\n",
+    "import yaml\\n",
+    "from pathlib import Path\\n",
+    "\\n",
+    "from app.data.loader import DataLoader\\n",
+    "from app.models.finetune.trainer import Trainer\\n",
+    "from app.utils.logger import setup_logging\\n",
+    "\\n",
+    "# Setup logging\\n",
+    "setup_logging()"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 1. Load Configuration"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Load config\\n",
+    "config_path = Path('../configs/default.yml')\\n",
+    "with open(config_path, 'r') as f:\\n",
+    "    config = yaml.safe_load(f)\\n",
+    "\\n",
+    "print('Configuration loaded')\\n",
+    "print(f\\"Training config: {{config['model']['finetune']}}\\")"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 2. Load Processed Data"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "data_loader = DataLoader(\\n",
+    "    raw_path=config['data']['raw_path'],\\n",
+    "    processed_path=config['data']['processed_path']\\n",
+    ")\\n",
+    "\\n",
+    "# TODO: Load your processed data\\n",
+    "# train_data = data_loader.load_processed_data('train.pkl')\\n",
+    "# val_data = data_loader.load_processed_data('val.pkl')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 3. Initialize Trainer"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Initialize your trainer\\n",
+    "# trainer = Trainer(config['model']['finetune'])\\n",
+    "\\n",
+    "print('Trainer initialized')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 4. Train Model"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Start training\\n",
+    "# trainer.train(train_data, val_data)\\n",
+    "\\n",
+    "print('Training started...')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 5. Save Model"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Save the trained model\\n",
+    "# trainer.save_model('model_checkpoint.pth')\\n",
+    "\\n",
+    "print('Model saved!')"
+   ],
+   "outputs": []
+  }}
+ ],
+ "metadata": {{
+  "kernelspec": {{
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }},
+  "language_info": {{
+   "codemirror_mode": {{
+    "name": "ipython",
+    "version": 3
+   }},
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  }}
+ }},
+ "nbformat": 4,
+ "nbformat_minor": 4
+}}
+'''.format(**context)
+
+        self._create_file(output_path / "notebooks/training.ipynb", content)
+
+    def _generate_evaluation_notebook(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate evaluation.ipynb notebook."""
+        content = '''{{
+ "cells": [
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "# {project_name} - Model Evaluation\\n",
+    "\\n",
+    "This notebook handles model evaluation and analysis."
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "import sys\\n",
+    "sys.path.append('..')\\n",
+    "\\n",
+    "import numpy as np\\n",
+    "import matplotlib.pyplot as plt\\n",
+    "import seaborn as sns\\n",
+    "import yaml\\n",
+    "from pathlib import Path\\n",
+    "\\n",
+    "from app.data.loader import DataLoader\\n",
+    "from app.models.inference import InferenceEngine\\n",
+    "from app.utils.logger import setup_logging\\n",
+    "\\n",
+    "# Setup logging\\n",
+    "setup_logging()\\n",
+    "\\n",
+    "# Set visualization style\\n",
+    "sns.set_style('whitegrid')\\n",
+    "plt.rcParams['figure.figsize'] = (12, 6)"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 1. Load Configuration"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# Load config\\n",
+    "config_path = Path('../configs/default.yml')\\n",
+    "with open(config_path, 'r') as f:\\n",
+    "    config = yaml.safe_load(f)\\n",
+    "\\n",
+    "print('Configuration loaded')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 2. Load Test Data"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "data_loader = DataLoader(\\n",
+    "    raw_path=config['data']['raw_path'],\\n",
+    "    processed_path=config['data']['processed_path']\\n",
+    ")\\n",
+    "\\n",
+    "# TODO: Load your test data\\n",
+    "# test_data = data_loader.load_processed_data('test.pkl')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 3. Load Model"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Load your trained model\\n",
+    "# inference_engine = InferenceEngine(model_path='model_checkpoint.pth')\\n",
+    "\\n",
+    "print('Model loaded')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 4. Run Evaluation"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Run evaluation\\n",
+    "# predictions = inference_engine.predict(test_data)\\n",
+    "\\n",
+    "print('Evaluation completed')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 5. Calculate Metrics"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Calculate evaluation metrics\\n",
+    "# from sklearn.metrics import accuracy_score, f1_score\\n",
+    "# accuracy = accuracy_score(y_true, predictions)\\n",
+    "# f1 = f1_score(y_true, predictions, average='weighted')\\n",
+    "\\n",
+    "# print(f'Accuracy: {{accuracy:.4f}}')\\n",
+    "# print(f'F1 Score: {{f1:.4f}}')"
+   ],
+   "outputs": []
+  }},
+  {{
+   "cell_type": "markdown",
+   "metadata": {{}},
+   "source": [
+    "## 6. Visualizations"
+   ]
+  }},
+  {{
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {{}},
+   "source": [
+    "# TODO: Add visualizations (confusion matrix, ROC curve, etc.)\\n",
+    "pass"
+   ],
+   "outputs": []
+  }}
+ ],
+ "metadata": {{
+  "kernelspec": {{
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }},
+  "language_info": {{
+   "codemirror_mode": {{
+    "name": "ipython",
+    "version": 3
+   }},
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  }}
+ }},
+ "nbformat": 4,
+ "nbformat_minor": 4
+}}
+'''.format(**context)
+
+        self._create_file(output_path / "notebooks/evaluation.ipynb", content)
+
+    def _generate_copilot_instruction(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate .github/copilot-instructions.md for GitHub Copilot."""
+        content = """# GitHub Copilot Instructions - {project_name}
+
+## Project Context
+
+This is an **AI/ML project** using a **pipeline-based architecture** for building intelligent applications.
+
+## Architecture Overview
+
+### Pipeline-Based Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Application Layer                     │
+│                          (app/main.py)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                        Pipeline Layer                        │
+│  ┌──────────────┐              ┌──────────────┐            │
+│  │  RAG Pipeline │              │ NLP Pipeline  │            │
+│  │  - Embedder   │              │  - Processor  │            │
+│  │  - Retriever  │              │               │            │
+│  │  - Generator  │              │               │            │
+│  └──────────────┘              └──────────────┘            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                         Models Layer                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  Embedding   │  │  Fine-tune   │  │  Inference   │      │
+│  │   Models     │  │   Trainer    │  │   Engine     │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                          Data Layer                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  Raw Data    │  │  Processed   │  │ Data Loader  │      │
+│  │   Storage    │  │    Data      │  │              │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Code Generation Guidelines
+
+### 1. RAG Pipeline Components
+
+When generating RAG pipeline code:
+
+**Embedder** (`app/pipelines/rag/embedder.py`):
+```python
+class Embedder:
+    def __init__(self, model_name: str):
+        # Initialize embedding model (e.g., sentence-transformers)
+        pass
+
+    def embed(self, texts: list[str]) -> np.ndarray:
+        # Convert texts to embeddings
+        pass
+```
+
+**Retriever** (`app/pipelines/rag/retriever.py`):
+```python
+class Retriever:
+    def __init__(self, embedder: Embedder):
+        # Initialize with embedder and vector store
+        pass
+
+    def retrieve(self, query: str, top_k: int = 5) -> list[Document]:
+        # Retrieve relevant documents
+        pass
+```
+
+**Generator** (`app/pipelines/rag/generator.py`):
+```python
+class Generator:
+    def __init__(self, model_name: str):
+        # Initialize generation model
+        pass
+
+    def generate(self, query: str, context: list[Document]) -> str:
+        # Generate response using context
+        pass
+```
+
+### 2. Model Components
+
+**Embedding Model** (`app/models/embedding/embedder.py`):
+```python
+from sentence_transformers import SentenceTransformer
+
+class EmbeddingModel:
+    def __init__(self, model_name: str):
+        self.model = SentenceTransformer(model_name)
+
+    def encode(self, texts: list[str]) -> np.ndarray:
+        return self.model.encode(texts)
+```
+
+**Trainer** (`app/models/finetune/trainer.py`):
+```python
+class Trainer:
+    def __init__(self, config: dict):
+        # Initialize training configuration
+        pass
+
+    def train(self, train_data, val_data):
+        # Training loop with logging and checkpointing
+        pass
+
+    def evaluate(self, test_data):
+        # Model evaluation
+        pass
+```
+
+**Inference Engine** (`app/models/inference.py`):
+```python
+class InferenceEngine:
+    def __init__(self, model_path: str):
+        # Load trained model
+        pass
+
+    def predict(self, inputs):
+        # Run inference
+        pass
+```
+
+### 3. Data Components
+
+**Data Loader** (`app/data/loader.py`):
+```python
+class DataLoader:
+    def __init__(self, config: dict):
+        self.raw_path = config.get("raw_path")
+        self.processed_path = config.get("processed_path")
+
+    def load_raw_data(self, source: str):
+        # Load raw data from various sources
+        pass
+
+    def preprocess(self, data):
+        # Data preprocessing and cleaning
+        pass
+
+    def save_processed(self, data, filename: str):
+        # Save processed data
+        pass
+```
+
+### 4. Utility Components
+
+**Logger** (`app/utils/logger.py`):
+```python
+import logging
+
+def get_logger(name: str) -> logging.Logger:
+    logger = logging.getLogger(name)
+    # Configure logger
+    return logger
+```
+
+**Helpers** (`app/utils/helpers.py`):
+```python
+def load_config(config_path: str) -> dict:
+    # Load YAML configuration
+    pass
+
+def save_checkpoint(model, path: str):
+    # Save model checkpoint
+    pass
+
+def load_checkpoint(path: str):
+    # Load model checkpoint
+    pass
+```
+
+## Naming Conventions
+
+### Files and Directories
+- Snake_case for Python files: `data_loader.py`, `embedding_model.py`
+- Lowercase for directories: `pipelines/`, `models/`, `data/`
+- Configuration files: `default.yml`, `production.yml`
+
+### Python Code
+- PascalCase for classes: `Embedder`, `Retriever`, `InferenceEngine`
+- snake_case for functions and variables: `embed_text()`, `model_path`
+- UPPERCASE for constants: `MAX_SEQUENCE_LENGTH`, `DEFAULT_BATCH_SIZE`
+
+### Models and Experiments
+- Descriptive names: `bert-base-finetuned-v1`, `rag-embedder-v2`
+- Include version numbers: `model-v1.0.0`
+- Date stamps for experiments: `experiment-2024-01-15`
+
+## Common Patterns
+
+### 1. Configuration Management
+```python
+from app.utils.helpers import load_config
+
+config = load_config("configs/default.yml")
+model_config = config["model"]
+```
+
+### 2. Pipeline Composition
+```python
+# Compose pipeline from components
+embedder = Embedder(config["rag"]["embedding_model"])
+retriever = Retriever(embedder)
+generator = Generator(config["rag"]["generation_model"])
+
+# Run pipeline
+docs = retriever.retrieve(query)
+response = generator.generate(query, docs)
+```
+
+### 3. Model Training
+```python
+from app.models.finetune.trainer import Trainer
+from app.data.loader import DataLoader
+
+# Load data
+loader = DataLoader(config["data"])
+train_data = loader.load_processed("train.pkl")
+
+# Train model
+trainer = Trainer(config["model"])
+model = trainer.train(train_data)
+trainer.save_checkpoint(model, "checkpoints/model-v1")
+```
+
+### 4. Experiment Tracking
+```python
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+# Log experiments
+logger.info(f"Starting training with config: {{config}}")
+logger.info(f"Training metrics: {{metrics}}")
+```
+
+## Error Handling
+
+### Pipeline Errors
+```python
+try:
+    docs = retriever.retrieve(query)
+except Exception as e:
+    logger.error(f"Retrieval failed: {{e}}")
+    # Fallback or re-raise
+```
+
+### Model Loading Errors
+```python
+try:
+    model = load_checkpoint(model_path)
+except FileNotFoundError:
+    logger.warning("Checkpoint not found, using default model")
+    model = load_default_model()
+```
+
+### Data Validation
+```python
+def validate_data(data):
+    if data is None or len(data) == 0:
+        raise ValueError("Empty dataset")
+    # Additional validation
+```
+
+## Testing Patterns
+
+### Unit Tests
+```python
+import pytest
+from app.pipelines.rag.embedder import Embedder
+
+def test_embedder():
+    embedder = Embedder("test-model")
+    texts = ["hello world"]
+    embeddings = embedder.embed(texts)
+    assert embeddings.shape[0] == len(texts)
+```
+
+### Integration Tests
+```python
+def test_rag_pipeline():
+    # Test full pipeline
+    embedder = Embedder(config)
+    retriever = Retriever(embedder)
+    generator = Generator(config)
+
+    query = "test query"
+    docs = retriever.retrieve(query)
+    response = generator.generate(query, docs)
+
+    assert response is not None
+    assert len(docs) > 0
+```
+
+## Documentation Standards
+
+### Docstrings
+```python
+def train_model(data, config):
+    \"\"\"Train ML model with given data.
+
+    Args:
+        data: Training dataset
+        config: Training configuration dictionary
+
+    Returns:
+        Trained model instance
+
+    Raises:
+        ValueError: If data is empty or invalid
+    \"\"\"
+    pass
+```
+
+### Model Documentation
+- Document model architecture
+- Include training data information
+- Record hyperparameters
+- Note performance metrics
+- Document limitations and biases
+
+## Performance Considerations
+
+### Batch Processing
+```python
+# Process data in batches
+def batch_inference(data, batch_size=32):
+    for i in range(0, len(data), batch_size):
+        batch = data[i:i+batch_size]
+        yield model.predict(batch)
+```
+
+### Caching
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def get_embedding(text: str):
+    return embedder.embed([text])[0]
+```
+
+### Memory Management
+```python
+# Clear cache when needed
+import gc
+import torch
+
+del model
+gc.collect()
+torch.cuda.empty_cache()  # If using GPU
+```
+
+## Deployment Patterns
+
+### Model Serving
+```python
+from app.models.inference import InferenceEngine
+
+class ModelServer:
+    def __init__(self, model_path: str):
+        self.engine = InferenceEngine(model_path)
+
+    def predict(self, request):
+        inputs = self.preprocess(request)
+        outputs = self.engine.predict(inputs)
+        return self.postprocess(outputs)
+```
+
+### API Endpoints (if applicable)
+```python
+@app.post("/predict")
+async def predict(request: PredictRequest):
+    result = model_server.predict(request.data)
+    return {{"prediction": result}}
+```
+
+## Jupyter Notebook Guidelines
+
+### Notebook Structure
+1. **Setup**: Imports and configuration
+2. **Data Loading**: Load and explore data
+3. **Preprocessing**: Clean and transform data
+4. **Modeling**: Train and evaluate models
+5. **Analysis**: Analyze results and visualizations
+6. **Conclusion**: Summary and next steps
+
+### Code Organization
+- Keep notebooks focused on one task
+- Extract reusable code to modules
+- Document assumptions and decisions
+- Include visualizations and metrics
+
+## Remember
+
+When generating code for this AI/ML project:
+
+1. **Use type hints** for better code clarity
+2. **Log important events** and metrics
+3. **Handle errors gracefully** with proper exception handling
+4. **Write modular code** that can be tested independently
+5. **Document complex logic** and model decisions
+6. **Use configuration files** for hyperparameters
+7. **Version models and data** for reproducibility
+8. **Optimize for batch processing** when possible
+9. **Consider memory usage** for large datasets
+10. **Write comprehensive tests** for critical components
+
+**Follow these patterns and the generated code will integrate seamlessly with this AI/ML project!**
+""".format(**context)
+
+        self._create_file(output_path / ".github/copilot-instructions.md", content)

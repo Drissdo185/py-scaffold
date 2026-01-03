@@ -11,47 +11,18 @@ class BackendAPITemplate(TemplateManager):
 
     def render(self, output_path: Path, context: Dict[str, Any]) -> None:
         """Render the Backend API template."""
-        project_name = context["project_name_snake"]
-
         # Create directory structure
         self._create_structure(output_path)
 
-        # Generate files
+        # Generate non-Python files only
         self._generate_config_yaml(output_path, context)
-        self._generate_main_py(output_path, context)
         self._generate_requirements(output_path, context)
         self._generate_readme(output_path, context)
         self._generate_gitignore(output_path)
 
-        # Core
-        self._generate_core_config(output_path, context)
-        self._generate_core_init(output_path)
-
-        # Model
-        self._generate_model_user(output_path, context)
-        self._generate_model_init(output_path)
-
-        # Repository
-        self._generate_repository_user(output_path, context)
-        self._generate_repository_init(output_path)
-
-        # Service
-        self._generate_service_user(output_path, context)
-        self._generate_service_init(output_path)
-
-        # Controller
-        self._generate_controller_user(output_path, context)
-        self._generate_controller_init(output_path)
-
-        # DTO
-        self._generate_dto_user(output_path, context)
-        self._generate_dto_init(output_path)
-
-        # App init
-        self._generate_app_init(output_path)
-
-        # Tests
-        self._generate_tests_init(output_path)
+        # Documentation for AI assistants
+        self._generate_claude_md(output_path, context)
+        self._generate_copilot_instruction(output_path, context)
 
     def _create_structure(self, output_path: Path) -> None:
         """Create directory structure."""
@@ -63,6 +34,7 @@ class BackendAPITemplate(TemplateManager):
             "src/app/controller",
             "src/app/dto",
             "tests",
+            ".github",
         ]
 
         for dir_path in dirs:
@@ -783,3 +755,433 @@ __all__ = ["UserCreateDTO", "UserUpdateDTO", "UserResponseDTO"]
 '''
 
         self._create_file(output_path / "tests/__init__.py", content)
+
+    def _generate_claude_md(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate CLAUDE.md for Claude Code."""
+        content = """# {project_name} - Project Documentation for Claude Code
+
+This document provides an overview of the project structure and architecture for AI-assisted development with Claude Code.
+
+## Project Overview
+
+This is a production-ready Backend API project following a clean layered architecture pattern.
+
+**Project Name**: {project_name}
+**Architecture**: Layered (MVC-inspired with additional Service and Repository layers)
+**Configuration**: YAML-based with Pydantic validation
+
+## Project Structure
+
+```
+{project_name}/
+├── src/
+│   ├── config.yaml               # Application configuration (YAML format)
+│   ├── main.py                   # Application entry point
+│   └── app/
+│       ├── core/                 # Core functionality
+│       │   ├── __init__.py
+│       │   └── config.py         # Configuration management (loads YAML into Pydantic models)
+│       ├── model/                # Domain Models / Entities
+│       │   ├── __init__.py
+│       │   └── user.py           # User entity (dataclass)
+│       ├── repository/           # Data Access Layer
+│       │   ├── __init__.py
+│       │   └── user_repository.py # User data persistence
+│       ├── service/              # Business Logic Layer
+│       │   ├── __init__.py
+│       │   └── user_service.py   # User business logic & validation
+│       ├── controller/           # Request Handling Layer
+│       │   ├── __init__.py
+│       │   └── user_controller.py # User request handlers
+│       └── dto/                  # Data Transfer Objects
+│           ├── __init__.py
+│           └── user_dto.py       # User API contracts
+├── tests/                        # Test files
+│   └── __init__.py
+├── docs/                         # Documentation
+│   ├── Claude.md                 # This file
+│   └── copilot_instruction.md    # GitHub Copilot instructions
+├── requirements.txt              # Python dependencies
+├── README.md                     # Project README
+└── .gitignore
+
+```
+
+## Architectural Layers
+
+### 1. Model Layer (`src/app/model/`)
+**Purpose**: Define domain entities and data structures
+
+**Responsibilities**:
+- Define core business entities using dataclasses
+- Represent the domain model
+- No business logic or data access code
+
+**Example**: `user.py` defines the User entity with id, name, email, and timestamps
+
+**When to modify**:
+- Adding new domain entities
+- Adding/removing fields from existing entities
+- Changing data types or relationships
+
+### 2. Repository Layer (`src/app/repository/`)
+**Purpose**: Abstract data access and persistence
+
+**Responsibilities**:
+- CRUD operations (Create, Read, Update, Delete)
+- Database/storage interaction
+- Query logic
+- Data persistence abstraction
+
+**Example**: `user_repository.py` provides methods like `create()`, `get_by_id()`, `get_by_email()`, `list_all()`, `update()`, `delete()`
+
+**Current Implementation**: In-memory storage (dictionary-based)
+
+**When to modify**:
+- Switching to real database (PostgreSQL, MongoDB, etc.)
+- Adding new query methods
+- Optimizing data access patterns
+
+### 3. Service Layer (`src/app/service/`)
+**Purpose**: Implement business logic and orchestration
+
+**Responsibilities**:
+- Business rules and validation
+- Orchestrate multiple repositories
+- Transaction management
+- Business logic workflows
+
+**Example**: `user_service.py` validates email format, checks for duplicates, enforces business rules
+
+**When to modify**:
+- Adding new business rules
+- Complex operations involving multiple entities
+- Validation logic changes
+
+### 4. Controller Layer (`src/app/controller/`)
+**Purpose**: Handle requests and responses
+
+**Responsibilities**:
+- Request handling
+- Input validation and parsing
+- Response formatting
+- Error handling
+- Coordinate between Service and DTO layers
+
+**Example**: `user_controller.py` handles user-related requests, converts between DTOs and models
+
+**When to modify**:
+- Adding new API endpoints
+- Changing request/response formats
+- Adding error handling
+
+### 5. DTO Layer (`src/app/dto/`)
+**Purpose**: Define API contracts and data transfer objects
+
+**Responsibilities**:
+- Define request/response schemas
+- Data transformation between API and domain models
+- API versioning
+
+**Example**: `user_dto.py` defines `UserCreateDTO`, `UserUpdateDTO`, `UserResponseDTO`
+
+**When to modify**:
+- Changing API contracts
+- Adding new endpoints
+- API versioning
+
+### 6. Core Layer (`src/app/core/`)
+**Purpose**: Shared functionality and configuration
+
+**Responsibilities**:
+- Configuration management
+- Shared utilities
+- Cross-cutting concerns
+
+**Example**: `config.py` loads YAML configuration into Pydantic Settings objects
+
+## Configuration Management
+
+**File**: `src/config.yaml`
+**Parser**: `src/app/core/config.py`
+
+The project uses YAML for configuration with Pydantic for type-safe validation:
+
+1. Configuration is defined in `config.yaml`
+2. Pydantic models in `core/config.py` define the structure
+3. Settings are loaded at startup and available as `settings` singleton
+
+**Configuration Sections**:
+- `app`: Application metadata (name, version, environment)
+- `server`: Server settings (host, port)
+- `database`: Database connection details
+- `logging`: Logging configuration
+
+## Development Workflow
+
+### Adding a New Entity
+
+1. **Model**: Create entity in `app/model/`
+2. **Repository**: Create repository in `app/repository/`
+3. **Service**: Create service with business logic in `app/service/`
+4. **DTO**: Create DTOs for API contracts in `app/dto/`
+5. **Controller**: Create controller to handle requests in `app/controller/`
+6. **Tests**: Add tests in `tests/`
+
+### Common Tasks
+
+**Adding a new field to User**:
+1. Update `model/user.py`
+2. Update `repository/user_repository.py` CRUD methods
+3. Update `dto/user_dto.py` DTOs
+4. Update service validation if needed
+5. Update tests
+
+**Adding business logic**:
+- Add to appropriate Service class
+- Keep business logic OUT of Repository and Controller layers
+
+**Changing database**:
+- Modify Repository layer only
+- Service and Controller layers should remain unchanged
+
+## Design Principles
+
+1. **Separation of Concerns**: Each layer has a single, well-defined responsibility
+2. **Dependency Direction**: Controller → Service → Repository → Model
+3. **Dependency Injection**: Dependencies are passed through constructors
+4. **Type Safety**: Full type hints throughout the codebase
+5. **Testability**: Each layer can be tested in isolation with mocks
+
+## Testing Strategy
+
+- **Unit Tests**: Test each layer independently with mocks
+- **Integration Tests**: Test layer interactions
+- **E2E Tests**: Test complete request flows
+
+## Notes for AI Assistants
+
+- Always maintain layer separation
+- Don't put business logic in Controllers or Repositories
+- Keep DTOs separate from Models
+- Use dependency injection
+- Follow existing patterns when adding new features
+- Validate input at Service layer
+- Handle errors at Controller layer
+""".format(**context)
+
+        self._create_file(output_path / "CLAUDE.md", content)
+
+    def _generate_copilot_instruction(self, output_path: Path, context: Dict[str, Any]) -> None:
+        """Generate .github/copilot-instructions.md for GitHub Copilot."""
+        content = """# GitHub Copilot Instructions - {project_name}
+
+## Project Overview
+
+This is a production-ready Backend API project following a clean layered architecture pattern.
+
+**Project Name**: {project_name}
+**Architecture**: Layered (MVC-inspired with additional Service and Repository layers)
+**Configuration**: YAML-based with Pydantic validation
+
+## Project Structure
+
+```
+{project_name}/
+├── src/
+│   ├── config.yaml               # Application configuration (YAML format)
+│   ├── main.py                   # Application entry point
+│   └── app/
+│       ├── core/                 # Core functionality
+│       │   ├── __init__.py
+│       │   └── config.py         # Configuration management (loads YAML into Pydantic models)
+│       ├── model/                # Domain Models / Entities
+│       │   ├── __init__.py
+│       │   └── user.py           # User entity (dataclass)
+│       ├── repository/           # Data Access Layer
+│       │   ├── __init__.py
+│       │   └── user_repository.py # User data persistence
+│       ├── service/              # Business Logic Layer
+│       │   ├── __init__.py
+│       │   └── user_service.py   # User business logic & validation
+│       ├── controller/           # Request Handling Layer
+│       │   ├── __init__.py
+│       │   └── user_controller.py # User request handlers
+│       └── dto/                  # Data Transfer Objects
+│           ├── __init__.py
+│           └── user_dto.py       # User API contracts
+├── tests/                        # Test files
+│   └── __init__.py
+├── docs/                         # Documentation
+│   ├── Claude.md                 # This file
+│   └── copilot_instruction.md    # GitHub Copilot instructions
+├── requirements.txt              # Python dependencies
+├── README.md                     # Project README
+└── .gitignore
+
+```
+
+## Architectural Layers
+
+### 1. Model Layer (`src/app/model/`)
+**Purpose**: Define domain entities and data structures
+
+**Responsibilities**:
+- Define core business entities using dataclasses
+- Represent the domain model
+- No business logic or data access code
+
+**Example**: `user.py` defines the User entity with id, name, email, and timestamps
+
+**When to modify**:
+- Adding new domain entities
+- Adding/removing fields from existing entities
+- Changing data types or relationships
+
+### 2. Repository Layer (`src/app/repository/`)
+**Purpose**: Abstract data access and persistence
+
+**Responsibilities**:
+- CRUD operations (Create, Read, Update, Delete)
+- Database/storage interaction
+- Query logic
+- Data persistence abstraction
+
+**Example**: `user_repository.py` provides methods like `create()`, `get_by_id()`, `get_by_email()`, `list_all()`, `update()`, `delete()`
+
+**Current Implementation**: In-memory storage (dictionary-based)
+
+**When to modify**:
+- Switching to real database (PostgreSQL, MongoDB, etc.)
+- Adding new query methods
+- Optimizing data access patterns
+
+### 3. Service Layer (`src/app/service/`)
+**Purpose**: Implement business logic and orchestration
+
+**Responsibilities**:
+- Business rules and validation
+- Orchestrate multiple repositories
+- Transaction management
+- Business logic workflows
+
+**Example**: `user_service.py` validates email format, checks for duplicates, enforces business rules
+
+**When to modify**:
+- Adding new business rules
+- Complex operations involving multiple entities
+- Validation logic changes
+
+### 4. Controller Layer (`src/app/controller/`)
+**Purpose**: Handle requests and responses
+
+**Responsibilities**:
+- Request handling
+- Input validation and parsing
+- Response formatting
+- Error handling
+- Coordinate between Service and DTO layers
+
+**Example**: `user_controller.py` handles user-related requests, converts between DTOs and models
+
+**When to modify**:
+- Adding new API endpoints
+- Changing request/response formats
+- Adding error handling
+
+### 5. DTO Layer (`src/app/dto/`)
+**Purpose**: Define API contracts and data transfer objects
+
+**Responsibilities**:
+- Define request/response schemas
+- Data transformation between API and domain models
+- API versioning
+
+**Example**: `user_dto.py` defines `UserCreateDTO`, `UserUpdateDTO`, `UserResponseDTO`
+
+**When to modify**:
+- Changing API contracts
+- Adding new endpoints
+- API versioning
+
+### 6. Core Layer (`src/app/core/`)
+**Purpose**: Shared functionality and configuration
+
+**Responsibilities**:
+- Configuration management
+- Shared utilities
+- Cross-cutting concerns
+
+**Example**: `config.py` loads YAML configuration into Pydantic Settings objects
+
+## Configuration Management
+
+**File**: `src/config.yaml`
+**Parser**: `src/app/core/config.py`
+
+The project uses YAML for configuration with Pydantic for type-safe validation:
+
+1. Configuration is defined in `config.yaml`
+2. Pydantic models in `core/config.py` define the structure
+3. Settings are loaded at startup and available as `settings` singleton
+
+**Configuration Sections**:
+- `app`: Application metadata (name, version, environment)
+- `server`: Server settings (host, port)
+- `database`: Database connection details
+- `logging`: Logging configuration
+
+## Development Workflow
+
+### Adding a New Entity
+
+1. **Model**: Create entity in `app/model/`
+2. **Repository**: Create repository in `app/repository/`
+3. **Service**: Create service with business logic in `app/service/`
+4. **DTO**: Create DTOs for API contracts in `app/dto/`
+5. **Controller**: Create controller to handle requests in `app/controller/`
+6. **Tests**: Add tests in `tests/`
+
+### Common Tasks
+
+**Adding a new field to User**:
+1. Update `model/user.py`
+2. Update `repository/user_repository.py` CRUD methods
+3. Update `dto/user_dto.py` DTOs
+4. Update service validation if needed
+5. Update tests
+
+**Adding business logic**:
+- Add to appropriate Service class
+- Keep business logic OUT of Repository and Controller layers
+
+**Changing database**:
+- Modify Repository layer only
+- Service and Controller layers should remain unchanged
+
+## Design Principles
+
+1. **Separation of Concerns**: Each layer has a single, well-defined responsibility
+2. **Dependency Direction**: Controller → Service → Repository → Model
+3. **Dependency Injection**: Dependencies are passed through constructors
+4. **Type Safety**: Full type hints throughout the codebase
+5. **Testability**: Each layer can be tested in isolation with mocks
+
+## Testing Strategy
+
+- **Unit Tests**: Test each layer independently with mocks
+- **Integration Tests**: Test layer interactions
+- **E2E Tests**: Test complete request flows
+
+## Notes for AI Assistants
+
+- Always maintain layer separation
+- Don't put business logic in Controllers or Repositories
+- Keep DTOs separate from Models
+- Use dependency injection
+- Follow existing patterns when adding new features
+- Validate input at Service layer
+- Handle errors at Controller layer
+""".format(**context)
+
+        self._create_file(output_path / ".github/copilot-instructions.md", content)
