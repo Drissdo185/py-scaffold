@@ -59,6 +59,7 @@ venv.bak/
 *.swp
 *.swo
 *~
+*.backup
 
 # OS
 .DS_Store

@@ -7,6 +7,22 @@ from typing import Optional
 from .generator import ProjectGenerator
 
 
+BANNER = """
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   ██████╗ ██╗   ██╗      ███████╗ ██████╗ █████╗ ███████╗║
+║   ██╔══██╗╚██╗ ██╔╝      ██╔════╝██╔════╝██╔══██╗██╔════╝║
+║   ██████╔╝ ╚████╔╝ █████╗███████╗██║     ███████║█████╗  ║
+║   ██╔═══╝   ╚██╔╝  ╚════╝╚════██║██║     ██╔══██║██╔══╝  ║
+║   ██║        ██║         ███████║╚██████╗██║  ██║██║     ║
+║   ╚═╝        ╚═╝         ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝     ║
+║                                                           ║
+║        🚀 Production-Ready Python Project Generator       ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+"""
+
+
 @click.command()
 @click.argument("project_name")
 @click.option(
@@ -44,12 +60,15 @@ def main(
         py-scaffold my-api --template backend-api
         py-scaffold my-ai-app --template ai-project
     """
+    # Display banner
+    click.echo(click.style(BANNER, fg='cyan', bold=True))
+
     # If template is not provided, show interactive selection
     if template is None:
         while True:
-            click.echo("Please select a project template:\n")
-            click.echo("1. backend-api  - Backend with FastAPI")
-            click.echo("2. ai-project   - AI/ML project (Up coming)\n")
+            click.echo("📋 Please select a project template:\n")
+            click.echo("  1. 🌐 backend-api  - Backend with FastAPI")
+            click.echo("  2. 🤖 ai-project   - AI/ML project\n")
 
             choice = click.prompt(
                 "Enter your choice",
@@ -57,18 +76,14 @@ def main(
                 show_choices=False
             )
             
-            if choice == "2":
-                click.echo("\nThe 'ai-project' template is coming soon! Please select 'backend-api' for now.\n")
-                continue  # Go back to the start of the loop
-            
-            # If we get here, choice must be "1"
-            template = "backend-api"
+            # Map choice to template
+            template = "backend-api" if choice == "1" else "ai-project"
             break
         
         click.echo()
 
-    click.echo(f"Creating project: {project_name}")
-    click.echo(f"Template: {template}")
+    click.echo(click.style(f"\n✨ Creating project: {project_name}", fg='green', bold=True))
+    click.echo(click.style(f"📦 Template: {template}", fg='yellow'))
 
     try:
         generator = ProjectGenerator(
@@ -80,20 +95,20 @@ def main(
 
         project_path = generator.generate()
 
-        click.echo(f"\nProject created successfully at: {project_path}")
-        click.echo("\nNext steps:")
-        click.echo(f"  cd {project_name}")
-        click.echo("  python -m venv venv")
-        click.echo("  source venv/bin/activate  # On Windows: venv\\Scripts\\activate")
-        click.echo("  pip install -r requirements.txt")
+        click.echo(click.style(f"\n✅ Project created successfully at: {project_path}", fg='green', bold=True))
+        click.echo(click.style("\n🚀 Next steps:", fg='cyan', bold=True))
+        click.echo(f"  📁 cd {project_name}")
+        click.echo(f"  🐍 python -m venv venv")
+        click.echo(f"  ⚡ source venv/bin/activate  # On Windows: venv\\Scripts\\activate")
+        click.echo(f"  📦 pip install -r requirements.txt")
 
         if template == "ai-project":
-            click.echo("  jupyter notebook  # To explore notebooks")
+            click.echo(f"  📓 jupyter notebook  # To explore notebooks")
 
-        click.echo("  python src/main.py")
+        click.echo(f"  ▶️  python src/main.py")
 
     except Exception as e:
-        click.echo(f"\nError: {str(e)}", err=True)
+        click.echo(click.style(f"\n❌ Error: {str(e)}", fg='red', bold=True), err=True)
         raise click.Abort()
 
 
