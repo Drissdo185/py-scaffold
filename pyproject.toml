@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 authors = [
-    {name = "Driss Do", email = "dothanhdat185@gmail.com"}
+    {name = "Drissdo185", email = "dothanhdat185@gmail.com"}
 ]
 keywords = ["cli", "scaffold", "template", "generator", "python"]
 classifiers = [
